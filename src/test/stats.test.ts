@@ -26,8 +26,9 @@ describe('computeStats', () => {
         { id: 'e3', playerId: 'p1', type: 'catch',  pointNumber: 2, timestamp: 3 },
         { id: 'e4', playerId: 'p1', type: 'drop',   pointNumber: 3, timestamp: 4 },
         { id: 'e5', playerId: 'p1', type: 'D',      pointNumber: 3, timestamp: 5 },
-        { id: 'e6', playerId: 'p1', type: 'goal',   pointNumber: 4, timestamp: 6 },
-        { id: 'e7', playerId: 'p1', type: 'assist', pointNumber: 5, timestamp: 7 },
+        { id: 'e6', playerId: 'p1', type: 'goal',      pointNumber: 4, timestamp: 6 },
+        { id: 'e7', playerId: 'p1', type: 'assist',    pointNumber: 5, timestamp: 7 },
+        { id: 'e8', playerId: 'p1', type: 'throwaway', pointNumber: 6, timestamp: 8 },
       ],
     })
     const [marie] = computeStats(team, [session])
@@ -37,6 +38,7 @@ describe('computeStats', () => {
     expect(marie.Ds).toBe(1)
     expect(marie.goals).toBe(1)
     expect(marie.assists).toBe(1)
+    expect(marie.throwaways).toBe(1)
   })
 
   it('calculates drop rate correctly', () => {

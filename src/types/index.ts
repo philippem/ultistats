@@ -10,7 +10,7 @@ export interface Team {
   players: Player[]
 }
 
-export type EventType = 'pass' | 'catch' | 'drop' | 'D' | 'goal' | 'assist'
+export type EventType = 'pass' | 'catch' | 'drop' | 'D' | 'goal' | 'assist' | 'throwaway'
 
 export const EVENT_LABELS: Record<EventType, string> = {
   pass: 'Pass',
@@ -19,6 +19,7 @@ export const EVENT_LABELS: Record<EventType, string> = {
   D: 'D',
   goal: 'Goal',
   assist: 'Assist',
+  throwaway: 'Throwaway',
 }
 
 export interface GameEvent {

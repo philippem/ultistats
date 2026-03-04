@@ -9,6 +9,7 @@ export interface PlayerStats {
   Ds: number
   goals: number
   assists: number
+  throwaways: number
   dropRate: number
 }
 
@@ -22,12 +23,13 @@ export function computeStats(team: Team, sessions: Session[]): PlayerStats[] {
       return {
         player,
         gamesPlayed: sessions.filter(s => s.events.some(e => e.playerId === player.id)).length,
-        passes:  count('pass'),
+        passes:     count('pass'),
         catches,
         drops,
-        Ds:      count('D'),
-        goals:   count('goal'),
-        assists: count('assist'),
+        Ds:         count('D'),
+        goals:      count('goal'),
+        assists:    count('assist'),
+        throwaways: count('throwaway'),
         dropRate: catches + drops > 0 ? Math.round((drops / (catches + drops)) * 100) : 0,
       }
     })

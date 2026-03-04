@@ -46,6 +46,7 @@ export default function StatsPage({ team, sessions, onBack }: Props) {
                 <th>D</th>
                 <th>Goal</th>
                 <th>Ast</th>
+                <th>Away</th>
               </tr>
             </thead>
             <tbody>
@@ -63,6 +64,7 @@ export default function StatsPage({ team, sessions, onBack }: Props) {
                   <td>{s.Ds}</td>
                   <td>{s.goals}</td>
                   <td>{s.assists}</td>
+                  <td>{s.throwaways}</td>
                 </tr>
               ))}
             </tbody>
@@ -76,7 +78,7 @@ export default function StatsPage({ team, sessions, onBack }: Props) {
               <thead>
                 <tr>
                   <th>Date</th><th>vs</th><th>Pass</th><th>Catch</th>
-                  <th>Drop</th><th>D</th><th>Goal</th><th>Ast</th>
+                  <th>Drop</th><th>D</th><th>Goal</th><th>Ast</th><th>Away</th>
                 </tr>
               </thead>
               <tbody>
@@ -95,6 +97,7 @@ export default function StatsPage({ team, sessions, onBack }: Props) {
                         <td>{c('D')}</td>
                         <td>{c('goal')}</td>
                         <td>{c('assist')}</td>
+                        <td>{c('throwaway')}</td>
                       </tr>
                     )
                   })}

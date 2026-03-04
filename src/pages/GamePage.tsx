@@ -10,12 +10,13 @@ interface Props {
 }
 
 const ACTIONS: { type: EventType; color: string }[] = [
-  { type: 'pass',   color: 'blue'   },
-  { type: 'catch',  color: 'green'  },
-  { type: 'drop',   color: 'red'    },
-  { type: 'D',      color: 'purple' },
-  { type: 'goal',   color: 'gold'   },
-  { type: 'assist', color: 'orange' },
+  { type: 'pass',      color: 'blue'   },
+  { type: 'catch',     color: 'green'  },
+  { type: 'drop',      color: 'red'    },
+  { type: 'D',         color: 'purple' },
+  { type: 'goal',      color: 'gold'   },
+  { type: 'assist',    color: 'orange' },
+  { type: 'throwaway', color: 'red'    },
 ]
 
 export default function GamePage({ team, session, onUpdate, onEnd }: Props) {
