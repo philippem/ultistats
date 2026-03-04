@@ -120,6 +120,43 @@ body {
   border-radius: var(--radius);
 }
 
+/* ── Lineup phase ────────────────────────────── */
+.lineup-phase {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  padding: 16px;
+  gap: 12px;
+  overflow-y: auto;
+}
+.side-toggle {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+.side-btn {
+  height: 60px;
+  border: 2px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--bg-secondary);
+  font-size: 18px;
+  font-weight: 700;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+.side-btn-active-o { background: #dbeafe; border-color: var(--blue); color: var(--blue); }
+.side-btn-active-d { background: #f3e8ff; border-color: var(--purple); color: var(--purple); }
+.lineup-label {
+  font-size: 13px;
+  color: var(--text-muted);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+.lineup-grid {
+  flex: 1;
+}
+
 /* ── Game page ───────────────────────────────── */
 .game-page {
   display: flex;
@@ -322,3 +359,20 @@ body {
 .player-detail h2 { font-size: 18px; font-weight: 700; margin-bottom: 12px; }
 .game-history h2 { font-size: 18px; font-weight: 700; margin-bottom: 12px; }
 .empty-state { text-align: center; color: var(--text-muted); margin-top: 60px; font-size: 18px; }
+.team-summary {
+  display: flex;
+  gap: 16px;
+  margin-bottom: 20px;
+}
+.team-summary-stat {
+  flex: 1;
+  background: var(--bg-secondary);
+  border-radius: var(--radius);
+  padding: 14px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.summary-label { font-size: 12px; font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em; }
+.summary-value { font-size: 28px; font-weight: 800; }
+.summary-sub { font-size: 12px; color: var(--text-muted); }

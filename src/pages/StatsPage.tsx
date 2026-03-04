@@ -2,6 +2,29 @@ import { useMemo, useState } from 'react'
 import type { Team, Session, EventType } from '../types'
 import { computeStats } from '../lib/stats'
 
+function TeamSummary({ sessions }: { sessions: Session[] }) {
+  const points = sessions.flatMap(s => s.points || [])
+  const oTotal = points.filter(p => p.side === 'O').length
+  const oHolds = points.filter(p => p.side === 'O' && p.scoredBy === 'us').length
+  const dTotal = points.filter(p => p.side === 'D').length
+  const dBreaks = points.filter(p => p.side === 'D' && p.scoredBy === 'us').length
+  if (points.length === 0) return null
+  return (
+    <div className="team-summary">
+      <div className="team-summary-stat">
+        <span className="summary-label">Hold %</span>
+        <span className="summary-value">{oTotal ? Math.round((oHolds / oTotal) * 100) : 0}%</span>
+        <span className="summary-sub">{oHolds}/{oTotal} O points</span>
+      </div>
+      <div className="team-summary-stat">
+        <span className="summary-label">Break %</span>
+        <span className="summary-value">{dTotal ? Math.round((dBreaks / dTotal) * 100) : 0}%</span>
+        <span className="summary-sub">{dBreaks}/{dTotal} D points</span>
+      </div>
+    </div>
+  )
+}
+
 interface Props {
   team: Team
   sessions: Session[]
@@ -34,12 +57,16 @@ export default function StatsPage({ team, sessions, onBack }: Props) {
       </header>
 
       <div className="stats-body">
+        <TeamSummary sessions={sessions} />
+
         <div className="stats-table-container">
           <table className="stats-table">
             <thead>
               <tr>
                 <th>Player</th>
                 <th>GP</th>
+                <th>O Pts</th>
+                <th>D Pts</th>
                 <th>Pass</th>
                 <th>Catch</th>
                 <th>Drop%</th>
@@ -58,6 +85,8 @@ export default function StatsPage({ team, sessions, onBack }: Props) {
                 >
                   <td>{s.player.name}</td>
                   <td>{s.gamesPlayed}</td>
+                  <td>{s.oPoints}</td>
+                  <td>{s.dPoints}</td>
                   <td>{s.passes}</td>
                   <td>{s.catches}</td>
                   <td className={s.dropRate > 20 ? 'stat-bad' : ''}>{s.dropRate}%</td>
@@ -77,7 +106,7 @@ export default function StatsPage({ team, sessions, onBack }: Props) {
             <table className="stats-table">
               <thead>
                 <tr>
-                  <th>Date</th><th>vs</th><th>Pass</th><th>Catch</th>
+                  <th>Date</th><th>vs</th><th>O</th><th>D</th><th>Pass</th><th>Catch</th>
                   <th>Drop</th><th>D</th><th>Goal</th><th>Ast</th><th>Away</th>
                 </tr>
               </thead>
@@ -91,6 +120,10 @@ export default function StatsPage({ team, sessions, onBack }: Props) {
                       <tr key={s.id}>
                         <td>{s.date}</td>
                         <td>{s.opponent}</td>
+                        <td>{c('drop')}</td>
+                        <td>{c('D')}</td>
+                        <td>{(s.points || []).filter(p => p.side === 'O' && p.lineup.includes(selected.player.id)).length}</td>
+                        <td>{(s.points || []).filter(p => p.side === 'D' && p.lineup.includes(selected.player.id)).length}</td>
                         <td>{c('pass')}</td>
                         <td>{c('catch')}</td>
                         <td>{c('drop')}</td>

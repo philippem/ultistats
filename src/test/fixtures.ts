@@ -20,6 +20,7 @@ export function makeSession(overrides: Partial<Session> = {}): Session {
     ourScore: 0,
     theirScore: 0,
     events: [],
+    points: [],
     completed: true,
     ...overrides,
   }

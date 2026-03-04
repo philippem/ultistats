@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { EVENT_LABELS } from '../types'
-import type { Team, Session, GameEvent, EventType } from '../types'
+import type { Team, Session, GameEvent, EventType, PointInfo } from '../types'
 
 interface Props {
   team: Team
@@ -19,14 +19,46 @@ const ACTIONS: { type: EventType; color: string }[] = [
   { type: 'throwaway', color: 'red'    },
 ]
 
+type Phase = 'lineup' | 'playing'
+
 export default function GamePage({ team, session, onUpdate, onEnd }: Props) {
+  const [phase, setPhase] = useState<Phase>('lineup')
+  const [currentSide, setCurrentSide] = useState<'O' | 'D'>('O')
+  const [lineup, setLineup] = useState<string[]>([])
   const [selectedId, setSelectedId] = useState<string | null>(null)
   const [currentPoint, setCurrentPoint] = useState(
     session.events.length > 0
-      ? Math.max(...session.events.map(e => e.pointNumber))
+      ? Math.max(...session.events.map(e => e.pointNumber)) + 1
       : 1
   )
   const [flash, setFlash] = useState<string | null>(null)
+
+  const [elapsed, setElapsed] = useState(Date.now() - session.startedAt)
+  useEffect(() => {
+    const id = setInterval(() => setElapsed(Date.now() - session.startedAt), 1000)
+    return () => clearInterval(id)
+  }, [session.startedAt])
+
+  function formatElapsed(ms: number) {
+    const s = Math.floor(ms / 1000)
+    const m = Math.floor(s / 60)
+    return `${m}:${String(s % 60).padStart(2, '0')}`
+  }
+
+  function eventTime(timestamp: number) {
+    return formatElapsed(timestamp - session.startedAt)
+  }
+
+  function toggleLineupPlayer(id: string) {
+    setLineup(prev =>
+      prev.includes(id) ? prev.filter(p => p !== id) : [...prev, id]
+    )
+  }
+
+  function startPoint() {
+    setPhase('playing')
+    setSelectedId(null)
+  }
 
   function logEvent(type: EventType) {
     if (!selectedId) {
@@ -45,13 +77,25 @@ export default function GamePage({ team, session, onUpdate, onEnd }: Props) {
   }
 
   function scorePoint(us: boolean) {
+    const pointInfo: PointInfo = {
+      pointNumber: currentPoint,
+      side: currentSide,
+      lineup,
+      scoredBy: us ? 'us' : 'them',
+    }
     onUpdate({
       ...session,
       ourScore:   us ? session.ourScore + 1   : session.ourScore,
       theirScore: us ? session.theirScore     : session.theirScore + 1,
+      points: [...(session.points || []), pointInfo],
     })
-    setCurrentPoint(p => p + 1)
+    const nextPoint = currentPoint + 1
+    setCurrentPoint(nextPoint)
     setSelectedId(null)
+    setLineup([])
+    // auto-suggest next side: we score → we pull → D; they score → they pull → O
+    setCurrentSide(us ? 'D' : 'O')
+    setPhase('lineup')
   }
 
   function undoLast() {
@@ -59,48 +103,90 @@ export default function GamePage({ team, session, onUpdate, onEnd }: Props) {
     onUpdate({ ...session, events: session.events.slice(0, -1) })
   }
 
-  const [elapsed, setElapsed] = useState(Date.now() - session.startedAt)
-  useEffect(() => {
-    const id = setInterval(() => setElapsed(Date.now() - session.startedAt), 1000)
-    return () => clearInterval(id)
-  }, [session.startedAt])
-
-  function formatElapsed(ms: number) {
-    const s = Math.floor(ms / 1000)
-    const m = Math.floor(s / 60)
-    return `${m}:${String(s % 60).padStart(2, '0')}`
-  }
-
-  function eventTime(timestamp: number) {
-    return formatElapsed(timestamp - session.startedAt)
-  }
-
-  const selectedPlayer = team.players.find(p => p.id === selectedId)
+  const lineupPlayers = team.players.filter(p => lineup.includes(p.id))
   const recentEvents = session.events.slice(-6).reverse()
+  const selectedPlayer = lineupPlayers.find(p => p.id === selectedId)
 
+  const header = (
+    <header className="game-header">
+      <div className="game-title">
+        <span className="team-name">{team.name}</span>
+        <span className="score">{session.ourScore} – {session.theirScore}</span>
+        <span className="opponent">{session.opponent}</span>
+      </div>
+      <div className="game-header-actions">
+        <span className="point-label">{formatElapsed(elapsed)}</span>
+        <span className="point-label">Pt {currentPoint}</span>
+        {phase === 'playing' && (
+          <button className="btn btn-ghost btn-sm" onClick={undoLast}>Undo</button>
+        )}
+        <button className="btn btn-danger btn-sm" onClick={() => onEnd(session)}>End Game</button>
+      </div>
+    </header>
+  )
+
+  // ── Lineup phase ──────────────────────────────────────────────────────────
+  if (phase === 'lineup') {
+    return (
+      <div className="game-page">
+        {header}
+        <div className="lineup-phase">
+          <div className="side-toggle">
+            <button
+              className={`side-btn ${currentSide === 'O' ? 'side-btn-active-o' : ''}`}
+              onClick={() => setCurrentSide('O')}
+            >
+              O — Offense
+            </button>
+            <button
+              className={`side-btn ${currentSide === 'D' ? 'side-btn-active-d' : ''}`}
+              onClick={() => setCurrentSide('D')}
+            >
+              D — Defense
+            </button>
+          </div>
+
+          <div className="lineup-label">
+            {lineup.length} / 7 on the line — tap to select
+          </div>
+
+          <div className="player-grid lineup-grid">
+            {team.players.map(player => (
+              <button
+                key={player.id}
+                className={`player-btn ${lineup.includes(player.id) ? 'selected' : ''}`}
+                onClick={() => toggleLineupPlayer(player.id)}
+              >
+                {player.number && <span className="player-num">#{player.number}</span>}
+                <span className="player-name">{player.name}</span>
+              </button>
+            ))}
+          </div>
+
+          <button
+            className="btn btn-primary btn-large"
+            onClick={startPoint}
+            disabled={lineup.length === 0}
+          >
+            Start Point
+          </button>
+        </div>
+      </div>
+    )
+  }
+
+  // ── Playing phase ─────────────────────────────────────────────────────────
   return (
     <div className="game-page">
-      <header className="game-header">
-        <div className="game-title">
-          <span className="team-name">{team.name}</span>
-          <span className="score">{session.ourScore} – {session.theirScore}</span>
-          <span className="opponent">{session.opponent}</span>
-        </div>
-        <div className="game-header-actions">
-          <span className="point-label">{formatElapsed(elapsed)}</span>
-          <span className="point-label">Pt {currentPoint}</span>
-          <button className="btn btn-ghost btn-sm" onClick={undoLast}>Undo</button>
-          <button className="btn btn-danger btn-sm" onClick={() => onEnd(session)}>End Game</button>
-        </div>
-      </header>
+      {header}
 
       <div className="game-body">
         <div className="players-panel">
           <div className="panel-label">
-            {selectedPlayer ? `Selected: ${selectedPlayer.name}` : 'Tap a player'}
+            {selectedPlayer ? `Selected: ${selectedPlayer.name}` : `Tap a player · ${currentSide} point`}
           </div>
           <div className="player-grid">
-            {team.players.map(player => (
+            {lineupPlayers.map(player => (
               <button
                 key={player.id}
                 className={`player-btn ${player.id === selectedId ? 'selected' : ''}`}

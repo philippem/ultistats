@@ -106,4 +106,32 @@ describe('computeStats', () => {
     const [marie] = computeStats(team, [s1, s2])
     expect(marie.goals).toBe(2)
   })
+
+  it('counts O and D points per player from lineup data', () => {
+    const session = makeSession({
+      events: [{ id: 'e1', playerId: 'p1', type: 'catch', pointNumber: 1, timestamp: 1 }],
+      points: [
+        { pointNumber: 1, side: 'O', lineup: ['p1', 'p2'], scoredBy: 'us' },
+        { pointNumber: 2, side: 'D', lineup: ['p1'],       scoredBy: 'them' },
+        { pointNumber: 3, side: 'D', lineup: ['p2'],       scoredBy: 'us' },
+      ],
+    })
+    const stats = computeStats(team, [session])
+    const marie = stats.find(s => s.player.name === 'Marie')!
+    const mark  = stats.find(s => s.player.name === 'Mark')!
+    expect(marie.oPoints).toBe(1)
+    expect(marie.dPoints).toBe(1)
+    expect(mark.oPoints).toBe(1)
+    expect(mark.dPoints).toBe(1)
+  })
+
+  it('returns 0 O/D points for players not in any lineup', () => {
+    const session = makeSession({
+      events: [{ id: 'e1', playerId: 'p1', type: 'D', pointNumber: 1, timestamp: 1 }],
+      points: [],
+    })
+    const [marie] = computeStats(team, [session])
+    expect(marie.oPoints).toBe(0)
+    expect(marie.dPoints).toBe(0)
+  })
 })

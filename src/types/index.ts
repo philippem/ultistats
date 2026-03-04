@@ -30,6 +30,13 @@ export interface GameEvent {
   timestamp: number
 }
 
+export interface PointInfo {
+  pointNumber: number
+  side: 'O' | 'D'
+  lineup: string[]     // player IDs on the field
+  scoredBy: 'us' | 'them'
+}
+
 export interface Session {
   id: string
   teamId: string
@@ -39,6 +46,7 @@ export interface Session {
   ourScore: number
   theirScore: number
   events: GameEvent[]
+  points: PointInfo[]
   completed: boolean
 }
 

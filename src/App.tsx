@@ -47,6 +47,7 @@ export default function App() {
       ourScore: 0,
       theirScore: 0,
       events: [],
+      points: [],
       completed: false,
     }
     updateState(prev => ({
