@@ -11,6 +11,7 @@ type Screen = 'setup' | 'home' | 'game' | 'stats'
 export default function App() {
   const [appState, setAppState] = useState<AppState>(() => load())
   const [screen, setScreen] = useState<Screen>(() => load().team ? 'home' : 'setup')
+  const [statsScope, setStatsScope] = useState<Session[] | null>(null)
   const [activeSession, setActiveSession] = useState<Session | null>(() => {
     const s = load()
     return s.activeSessionId ? (s.sessions.find(x => x.id === s.activeSessionId) ?? null) : null
@@ -89,16 +90,18 @@ export default function App() {
         session={activeSession}
         onUpdate={handleUpdateSession}
         onEnd={handleEndGame}
+        onStats={() => { setStatsScope([activeSession]); setScreen('stats') }}
       />
     )
   }
 
   if (screen === 'stats') {
+    const sessions = statsScope ?? appState.sessions.filter(s => s.completed)
     return (
       <StatsPage
         team={appState.team}
-        sessions={appState.sessions.filter(s => s.completed)}
-        onBack={() => setScreen('home')}
+        sessions={sessions}
+        onBack={() => { setStatsScope(null); setScreen(activeSession ? 'game' : 'home') }}
       />
     )
   }
@@ -120,7 +123,7 @@ export default function App() {
         ) : (
           <NewGameForm onStart={handleStartGame} />
         )}
-        <button className="btn btn-secondary" onClick={() => setScreen('stats')}>
+        <button className="btn btn-secondary" onClick={() => { setStatsScope(null); setScreen('stats') }}>
           View Stats
         </button>
         <button className="btn btn-ghost" onClick={() => setScreen('setup')}>

@@ -2,11 +2,15 @@ import { useState, useEffect } from 'react'
 import { EVENT_LABELS, FLIPS_TO_D, FLIPS_TO_O } from '../types'
 import type { Team, Session, GameEvent, EventType, PointInfo } from '../types'
 
+// Actions that require the player to be holding the disc — trigger implicit catch
+const NEEDS_DISC = new Set<EventType>(['pass', 'throwaway', 'goal', 'assist'])
+
 interface Props {
   team: Team
   session: Session
   onUpdate: (session: Session) => void
   onEnd: (session: Session) => void
+  onStats: () => void
 }
 
 const O_ACTIONS: { type: EventType; color: string }[] = [
@@ -27,7 +31,7 @@ const D_ACTIONS: { type: EventType; color: string }[] = [
 
 type Phase = 'lineup' | 'playing'
 
-export default function GamePage({ team, session, onUpdate, onEnd }: Props) {
+export default function GamePage({ team, session, onUpdate, onEnd, onStats }: Props) {
   const [phase, setPhase] = useState<Phase>('lineup')
   const [currentSide, setCurrentSide] = useState<'O' | 'D'>('O')
   const [possession, setPossession] = useState<'O' | 'D'>('O')
@@ -39,6 +43,7 @@ export default function GamePage({ team, session, onUpdate, onEnd }: Props) {
       : 1
   )
   const [flash, setFlash] = useState<string | null>(null)
+  const [discHolder, setDiscHolder] = useState<string | null>(null)
 
   const [elapsed, setElapsed] = useState(Date.now() - session.startedAt)
   useEffect(() => {
@@ -74,17 +79,22 @@ export default function GamePage({ team, session, onUpdate, onEnd }: Props) {
       setTimeout(() => setFlash(null), 1500)
       return
     }
-    const event: GameEvent = {
-      id: crypto.randomUUID(),
-      playerId: selectedId,
-      type,
-      pointNumber: currentPoint,
-      timestamp: Date.now(),
-    }
-    onUpdate({ ...session, events: [...session.events, event] })
+    const now = Date.now()
+    const newEvents: GameEvent[] = []
 
-    if (FLIPS_TO_D.has(type)) setPossession('D')
-    if (FLIPS_TO_O.has(type)) setPossession('O')
+    // Auto-log a catch when a new O player takes the disc before passing/scoring/throwing away
+    if (possession === 'O' && discHolder !== selectedId && NEEDS_DISC.has(type)) {
+      newEvents.push({ id: crypto.randomUUID(), playerId: selectedId, type: 'catch', pointNumber: currentPoint, timestamp: now })
+    }
+    newEvents.push({ id: crypto.randomUUID(), playerId: selectedId, type, pointNumber: currentPoint, timestamp: now + newEvents.length })
+
+    onUpdate({ ...session, events: [...session.events, ...newEvents] })
+
+    if (type === 'catch') setDiscHolder(selectedId)
+    else if (NEEDS_DISC.has(type)) setDiscHolder(null)
+
+    if (FLIPS_TO_D.has(type)) { setPossession('D'); setDiscHolder(null) }
+    if (FLIPS_TO_O.has(type)) { setPossession('O'); setDiscHolder(null) }
   }
 
   function scorePoint(us: boolean) {
@@ -103,6 +113,7 @@ export default function GamePage({ team, session, onUpdate, onEnd }: Props) {
     setCurrentPoint(p => p + 1)
     setSelectedId(null)
     setLineup([])
+    setDiscHolder(null)
     setCurrentSide(us ? 'D' : 'O')
     setPhase('lineup')
   }
@@ -130,6 +141,7 @@ export default function GamePage({ team, session, onUpdate, onEnd }: Props) {
         {phase === 'playing' && (
           <button className="btn btn-ghost btn-sm" onClick={undoLast}>Undo</button>
         )}
+        <button className="btn btn-ghost btn-sm" onClick={onStats}>Stats</button>
         <button className="btn btn-danger btn-sm" onClick={() => onEnd(session)}>End Game</button>
       </div>
     </header>

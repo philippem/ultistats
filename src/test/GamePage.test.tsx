@@ -8,8 +8,9 @@ function renderGame(overrides = {}) {
   const session = makeSession({ completed: false, ...overrides })
   const onUpdate = vi.fn()
   const onEnd = vi.fn()
-  render(<GamePage team={team} session={session} onUpdate={onUpdate} onEnd={onEnd} />)
-  return { session, onUpdate, onEnd }
+  const onStats = vi.fn()
+  render(<GamePage team={team} session={session} onUpdate={onUpdate} onEnd={onEnd} onStats={onStats} />)
+  return { session, onUpdate, onEnd, onStats }
 }
 
 // Selects players and starts the point from the lineup phase
@@ -146,5 +147,43 @@ describe('GamePage — playing phase', () => {
     const { onEnd } = renderGame()
     await user.click(screen.getByRole('button', { name: 'End Game' }))
     expect(onEnd).toHaveBeenCalledOnce()
+  })
+
+  it('calls onStats when Stats is tapped', async () => {
+    const user = userEvent.setup()
+    const { onStats } = renderGame()
+    await user.click(screen.getByRole('button', { name: 'Stats' }))
+    expect(onStats).toHaveBeenCalledOnce()
+  })
+
+  it('auto-logs a catch before pass when a new player is selected on O', async () => {
+    const user = userEvent.setup()
+    const { onUpdate } = renderGame()
+    await startPoint(user, ['Marie', 'Mark'])
+    // Marie catches explicitly (sets discHolder to Marie)
+    await user.click(screen.getByRole('button', { name: /Marie/ }))
+    await user.click(screen.getByRole('button', { name: 'Catch' }))
+    // Mark passes — the last onUpdate call should include implicit catch + pass for Mark
+    await user.click(screen.getByRole('button', { name: /Mark/ }))
+    await user.click(screen.getByRole('button', { name: 'Pass' }))
+    const lastCall = onUpdate.mock.calls.at(-1)![0]
+    const markEvents = lastCall.events.filter((e: { playerId: string }) => e.playerId === 'p2')
+    expect(markEvents[0].type).toBe('catch')
+    expect(markEvents[1].type).toBe('pass')
+  })
+
+  it('does not auto-log catch when the same player passes again', async () => {
+    const user = userEvent.setup()
+    const { onUpdate } = renderGame()
+    await startPoint(user, ['Marie'])
+    await user.click(screen.getByRole('button', { name: /Marie/ }))
+    await user.click(screen.getByRole('button', { name: 'Catch' }))
+    // Marie passes — she already has the disc, no implicit catch
+    await user.click(screen.getByRole('button', { name: 'Pass' }))
+    // Last onUpdate call should have exactly 1 new event (pass), no implicit catch
+    const lastCall = onUpdate.mock.calls.at(-1)![0]
+    expect(lastCall.events).toHaveLength(1)
+    expect(lastCall.events[0].type).toBe('pass')
+    expect(lastCall.events[0].playerId).toBe('p1')
   })
 })
