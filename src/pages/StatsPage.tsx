@@ -70,10 +70,11 @@ export default function StatsPage({ team, sessions, onBack }: Props) {
                 <th>Pass</th>
                 <th>Catch</th>
                 <th>Drop%</th>
-                <th>D</th>
+                <th>Blk</th>
                 <th>Goal</th>
                 <th>Ast</th>
                 <th>Away</th>
+                <th>UT</th>
               </tr>
             </thead>
             <tbody>
@@ -90,10 +91,11 @@ export default function StatsPage({ team, sessions, onBack }: Props) {
                   <td>{s.passes}</td>
                   <td>{s.catches}</td>
                   <td className={s.dropRate > 20 ? 'stat-bad' : ''}>{s.dropRate}%</td>
-                  <td>{s.Ds}</td>
+                  <td>{s.blocks}</td>
                   <td>{s.goals}</td>
                   <td>{s.assists}</td>
                   <td>{s.throwaways}</td>
+                  <td>{s.unforcedTurnovers}</td>
                 </tr>
               ))}
             </tbody>
@@ -107,7 +109,7 @@ export default function StatsPage({ team, sessions, onBack }: Props) {
               <thead>
                 <tr>
                   <th>Date</th><th>vs</th><th>O</th><th>D</th><th>Pass</th><th>Catch</th>
-                  <th>Drop</th><th>D</th><th>Goal</th><th>Ast</th><th>Away</th>
+                  <th>Drop%</th><th>Blk</th><th>Goal</th><th>Ast</th><th>Away</th><th>UT</th>
                 </tr>
               </thead>
               <tbody>
@@ -120,17 +122,16 @@ export default function StatsPage({ team, sessions, onBack }: Props) {
                       <tr key={s.id}>
                         <td>{s.date}</td>
                         <td>{s.opponent}</td>
-                        <td>{c('drop')}</td>
-                        <td>{c('D')}</td>
                         <td>{(s.points || []).filter(p => p.side === 'O' && p.lineup.includes(selected.player.id)).length}</td>
                         <td>{(s.points || []).filter(p => p.side === 'D' && p.lineup.includes(selected.player.id)).length}</td>
                         <td>{c('pass')}</td>
                         <td>{c('catch')}</td>
-                        <td>{c('drop')}</td>
-                        <td>{c('D')}</td>
+                        <td>{(() => { const ca = c('catch'), dr = c('drop'); return ca + dr > 0 ? Math.round((dr / (ca + dr)) * 100) + '%' : '0%' })()}</td>
+                        <td>{c('hand_block') + c('interception') + c('layout_d')}</td>
                         <td>{c('goal')}</td>
                         <td>{c('assist')}</td>
                         <td>{c('throwaway')}</td>
+                        <td>{c('unforced_turnover')}</td>
                       </tr>
                     )
                   })}

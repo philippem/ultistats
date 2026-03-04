@@ -8,10 +8,11 @@ export interface PlayerStats {
   passes: number
   catches: number
   drops: number
-  Ds: number
+  blocks: number       // hand_block + interception + layout_d
   goals: number
   assists: number
   throwaways: number
+  unforcedTurnovers: number
   dropRate: number
 }
 
@@ -32,10 +33,11 @@ export function computeStats(team: Team, sessions: Session[]): PlayerStats[] {
         passes:     count('pass'),
         catches,
         drops,
-        Ds:         count('D'),
+        blocks:     count('hand_block') + count('interception') + count('layout_d'),
         goals:      count('goal'),
         assists:    count('assist'),
         throwaways: count('throwaway'),
+        unforcedTurnovers: count('unforced_turnover'),
         dropRate: catches + drops > 0 ? Math.round((drops / (catches + drops)) * 100) : 0,
       }
     })

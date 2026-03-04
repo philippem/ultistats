@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { EVENT_LABELS } from '../types'
+import { EVENT_LABELS, FLIPS_TO_D, FLIPS_TO_O } from '../types'
 import type { Team, Session, GameEvent, EventType, PointInfo } from '../types'
 
 interface Props {
@@ -9,14 +9,20 @@ interface Props {
   onEnd: (session: Session) => void
 }
 
-const ACTIONS: { type: EventType; color: string }[] = [
+const O_ACTIONS: { type: EventType; color: string }[] = [
   { type: 'pass',      color: 'blue'   },
   { type: 'catch',     color: 'green'  },
+  { type: 'throwaway', color: 'orange' },
   { type: 'drop',      color: 'red'    },
-  { type: 'D',         color: 'purple' },
   { type: 'goal',      color: 'gold'   },
-  { type: 'assist',    color: 'orange' },
-  { type: 'throwaway', color: 'red'    },
+  { type: 'assist',    color: 'teal'   },
+]
+
+const D_ACTIONS: { type: EventType; color: string }[] = [
+  { type: 'hand_block',        color: 'purple' },
+  { type: 'interception',      color: 'purple' },
+  { type: 'layout_d',          color: 'purple' },
+  { type: 'unforced_turnover', color: 'gray'   },
 ]
 
 type Phase = 'lineup' | 'playing'
@@ -24,6 +30,7 @@ type Phase = 'lineup' | 'playing'
 export default function GamePage({ team, session, onUpdate, onEnd }: Props) {
   const [phase, setPhase] = useState<Phase>('lineup')
   const [currentSide, setCurrentSide] = useState<'O' | 'D'>('O')
+  const [possession, setPossession] = useState<'O' | 'D'>('O')
   const [lineup, setLineup] = useState<string[]>([])
   const [selectedId, setSelectedId] = useState<string | null>(null)
   const [currentPoint, setCurrentPoint] = useState(
@@ -56,6 +63,7 @@ export default function GamePage({ team, session, onUpdate, onEnd }: Props) {
   }
 
   function startPoint() {
+    setPossession(currentSide)
     setPhase('playing')
     setSelectedId(null)
   }
@@ -74,6 +82,9 @@ export default function GamePage({ team, session, onUpdate, onEnd }: Props) {
       timestamp: Date.now(),
     }
     onUpdate({ ...session, events: [...session.events, event] })
+
+    if (FLIPS_TO_D.has(type)) setPossession('D')
+    if (FLIPS_TO_O.has(type)) setPossession('O')
   }
 
   function scorePoint(us: boolean) {
@@ -85,15 +96,13 @@ export default function GamePage({ team, session, onUpdate, onEnd }: Props) {
     }
     onUpdate({
       ...session,
-      ourScore:   us ? session.ourScore + 1   : session.ourScore,
-      theirScore: us ? session.theirScore     : session.theirScore + 1,
+      ourScore:   us ? session.ourScore + 1 : session.ourScore,
+      theirScore: us ? session.theirScore   : session.theirScore + 1,
       points: [...(session.points || []), pointInfo],
     })
-    const nextPoint = currentPoint + 1
-    setCurrentPoint(nextPoint)
+    setCurrentPoint(p => p + 1)
     setSelectedId(null)
     setLineup([])
-    // auto-suggest next side: we score → we pull → D; they score → they pull → O
     setCurrentSide(us ? 'D' : 'O')
     setPhase('lineup')
   }
@@ -106,6 +115,7 @@ export default function GamePage({ team, session, onUpdate, onEnd }: Props) {
   const lineupPlayers = team.players.filter(p => lineup.includes(p.id))
   const recentEvents = session.events.slice(-6).reverse()
   const selectedPlayer = lineupPlayers.find(p => p.id === selectedId)
+  const actions = possession === 'O' ? O_ACTIONS : D_ACTIONS
 
   const header = (
     <header className="game-header">
@@ -183,7 +193,7 @@ export default function GamePage({ team, session, onUpdate, onEnd }: Props) {
       <div className="game-body">
         <div className="players-panel">
           <div className="panel-label">
-            {selectedPlayer ? `Selected: ${selectedPlayer.name}` : `Tap a player · ${currentSide} point`}
+            {selectedPlayer ? `Selected: ${selectedPlayer.name}` : 'Tap a player'}
           </div>
           <div className="player-grid">
             {lineupPlayers.map(player => (
@@ -200,9 +210,28 @@ export default function GamePage({ team, session, onUpdate, onEnd }: Props) {
         </div>
 
         <div className="actions-panel">
+          <div className={`possession-toggle ${possession === 'O' ? 'possession-o' : 'possession-d'}`}>
+            <button
+              className={`possession-btn ${possession === 'O' ? 'active' : ''}`}
+              onClick={() => setPossession('O')}
+            >
+              O
+            </button>
+            <span className="possession-label">
+              {possession === 'O' ? 'Offense' : 'Defense'}
+            </span>
+            <button
+              className={`possession-btn ${possession === 'D' ? 'active' : ''}`}
+              onClick={() => setPossession('D')}
+            >
+              D
+            </button>
+          </div>
+
           {flash && <div className="flash">{flash}</div>}
+
           <div className="action-grid">
-            {ACTIONS.map(({ type, color }) => (
+            {actions.map(({ type, color }) => (
               <button
                 key={type}
                 className={`action-btn action-${color}`}
@@ -212,6 +241,7 @@ export default function GamePage({ team, session, onUpdate, onEnd }: Props) {
               </button>
             ))}
           </div>
+
           <div className="score-buttons">
             <button className="btn-score-us" onClick={() => scorePoint(true)}>✓ We Scored</button>
             <button className="btn-score-them" onClick={() => scorePoint(false)}>They Scored</button>

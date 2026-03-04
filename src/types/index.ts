@@ -10,17 +10,30 @@ export interface Team {
   players: Player[]
 }
 
-export type EventType = 'pass' | 'catch' | 'drop' | 'D' | 'goal' | 'assist' | 'throwaway'
+export type EventType =
+  | 'pass' | 'catch' | 'throwaway' | 'drop' | 'goal' | 'assist'
+  | 'hand_block' | 'interception' | 'layout_d' | 'unforced_turnover'
 
 export const EVENT_LABELS: Record<EventType, string> = {
   pass: 'Pass',
   catch: 'Catch',
+  throwaway: 'Throwaway',
   drop: 'Drop',
-  D: 'D',
   goal: 'Goal',
   assist: 'Assist',
-  throwaway: 'Throwaway',
+  hand_block: 'Hand Block',
+  interception: 'Interception',
+  layout_d: 'Layout D',
+  unforced_turnover: 'Unforced TO',
 }
+
+export const O_EVENTS = new Set<EventType>(['pass', 'catch', 'throwaway', 'drop', 'goal', 'assist'])
+export const D_EVENTS = new Set<EventType>(['hand_block', 'interception', 'layout_d', 'unforced_turnover'])
+
+// Events that flip possession to D (we lost the disc)
+export const FLIPS_TO_D = new Set<EventType>(['throwaway', 'drop'])
+// Events that flip possession to O (we got the disc)
+export const FLIPS_TO_O = new Set<EventType>(['hand_block', 'interception', 'layout_d', 'unforced_turnover'])
 
 export interface GameEvent {
   id: string
