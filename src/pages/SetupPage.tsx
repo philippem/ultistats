@@ -87,6 +87,7 @@ export default function SetupPage({ onComplete, initialTeam }: Props) {
       >
         {initialTeam ? 'Save Changes' : 'Create Team'}
       </button>
+      <p style={{ color: 'var(--text-muted)', fontSize: 11, marginTop: 16 }}>{__GIT_HASH__}</p>
     </div>
   )
 }
