@@ -189,8 +189,8 @@ body {
   overflow: hidden;
   transition: background 0.25s;
 }
-.game-body-o { background: #eff6ff; }
-.game-body-d { background: #faf5ff; }
+.game-body-o { background: #e0f2fe; }
+.game-body-d { background: #ffedd5; }
 
 .players-panel {
   width: 55%;
