@@ -202,7 +202,7 @@ export default function GamePage({ team, session, onUpdate, onEnd, onStats }: Pr
     <div className="game-page">
       {header}
 
-      <div className="game-body">
+      <div className={`game-body ${possession === 'O' ? 'game-body-o' : 'game-body-d'}`}>
         <div className="players-panel">
           <div className="panel-label">
             {selectedPlayer ? `Selected: ${selectedPlayer.name}` : 'Tap a player'}

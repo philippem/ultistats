@@ -187,7 +187,10 @@ body {
   display: flex;
   flex: 1;
   overflow: hidden;
+  transition: background 0.25s;
 }
+.game-body-o { background: #eff6ff; }
+.game-body-d { background: #faf5ff; }
 
 .players-panel {
   width: 55%;
@@ -398,20 +401,3 @@ body {
 .player-detail h2 { font-size: 18px; font-weight: 700; margin-bottom: 12px; }
 .game-history h2 { font-size: 18px; font-weight: 700; margin-bottom: 12px; }
 .empty-state { text-align: center; color: var(--text-muted); margin-top: 60px; font-size: 18px; }
-.team-summary {
-  display: flex;
-  gap: 16px;
-  margin-bottom: 20px;
-}
-.team-summary-stat {
-  flex: 1;
-  background: var(--bg-secondary);
-  border-radius: var(--radius);
-  padding: 14px 16px;
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-}
-.summary-label { font-size: 12px; font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em; }
-.summary-value { font-size: 28px; font-weight: 800; }
-.summary-sub { font-size: 12px; color: var(--text-muted); }

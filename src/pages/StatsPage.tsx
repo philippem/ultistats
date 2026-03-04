@@ -2,28 +2,6 @@ import { useMemo, useState } from 'react'
 import type { Team, Session, EventType } from '../types'
 import { computeStats } from '../lib/stats'
 
-function TeamSummary({ sessions }: { sessions: Session[] }) {
-  const points = sessions.flatMap(s => s.points || [])
-  const oTotal = points.filter(p => p.side === 'O').length
-  const oHolds = points.filter(p => p.side === 'O' && p.scoredBy === 'us').length
-  const dTotal = points.filter(p => p.side === 'D').length
-  const dBreaks = points.filter(p => p.side === 'D' && p.scoredBy === 'us').length
-  if (points.length === 0) return null
-  return (
-    <div className="team-summary">
-      <div className="team-summary-stat">
-        <span className="summary-label">Hold %</span>
-        <span className="summary-value">{oTotal ? Math.round((oHolds / oTotal) * 100) : 0}%</span>
-        <span className="summary-sub">{oHolds}/{oTotal} O points</span>
-      </div>
-      <div className="team-summary-stat">
-        <span className="summary-label">Break %</span>
-        <span className="summary-value">{dTotal ? Math.round((dBreaks / dTotal) * 100) : 0}%</span>
-        <span className="summary-sub">{dBreaks}/{dTotal} D points</span>
-      </div>
-    </div>
-  )
-}
 
 interface Props {
   team: Team
@@ -57,8 +35,6 @@ export default function StatsPage({ team, sessions, onBack }: Props) {
       </header>
 
       <div className="stats-body">
-        <TeamSummary sessions={sessions} />
-
         <div className="stats-table-container">
           <table className="stats-table">
             <thead>
