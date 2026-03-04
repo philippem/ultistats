@@ -1,8 +1,14 @@
-import { defineConfig } from 'vite'
+import { defineConfig } from 'vitest/config'
 import react from '@vitejs/plugin-react'
 import { VitePWA } from 'vite-plugin-pwa'
+import { execSync } from 'child_process'
+
+const gitHash = execSync('git rev-parse --short HEAD').toString().trim()
 
 export default defineConfig({
+  define: {
+    __GIT_HASH__: JSON.stringify(gitHash),
+  },
   test: {
     environment: 'jsdom',
     globals: true,

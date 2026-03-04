@@ -126,6 +126,10 @@ export default function App() {
         </button>
       </div>
 
+      <p style={{ color: 'var(--text-muted)', fontSize: 11, marginBottom: 16 }}>
+        {__GIT_HASH__}
+      </p>
+
       {completedGames.length > 0 && (
         <div className="recent-games">
           <h2>Recent Games</h2>
