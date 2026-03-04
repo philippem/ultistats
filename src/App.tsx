@@ -43,6 +43,7 @@ export default function App() {
       teamId: appState.team!.id,
       opponent,
       date: new Date().toISOString().split('T')[0],
+      startedAt: Date.now(),
       ourScore: 0,
       theirScore: 0,
       events: [],

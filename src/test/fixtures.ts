@@ -16,6 +16,7 @@ export function makeSession(overrides: Partial<Session> = {}): Session {
     teamId: 'team-1',
     opponent: 'Chain Lightning',
     date: '2026-03-01',
+    startedAt: Date.now(),
     ourScore: 0,
     theirScore: 0,
     events: [],

@@ -35,6 +35,7 @@ export interface Session {
   teamId: string
   opponent: string
   date: string
+  startedAt: number
   ourScore: number
   theirScore: number
   events: GameEvent[]

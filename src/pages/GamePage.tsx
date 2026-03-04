@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { EVENT_LABELS } from '../types'
 import type { Team, Session, GameEvent, EventType } from '../types'
 
@@ -59,6 +59,22 @@ export default function GamePage({ team, session, onUpdate, onEnd }: Props) {
     onUpdate({ ...session, events: session.events.slice(0, -1) })
   }
 
+  const [elapsed, setElapsed] = useState(Date.now() - session.startedAt)
+  useEffect(() => {
+    const id = setInterval(() => setElapsed(Date.now() - session.startedAt), 1000)
+    return () => clearInterval(id)
+  }, [session.startedAt])
+
+  function formatElapsed(ms: number) {
+    const s = Math.floor(ms / 1000)
+    const m = Math.floor(s / 60)
+    return `${m}:${String(s % 60).padStart(2, '0')}`
+  }
+
+  function eventTime(timestamp: number) {
+    return formatElapsed(timestamp - session.startedAt)
+  }
+
   const selectedPlayer = team.players.find(p => p.id === selectedId)
   const recentEvents = session.events.slice(-6).reverse()
 
@@ -71,6 +87,7 @@ export default function GamePage({ team, session, onUpdate, onEnd }: Props) {
           <span className="opponent">{session.opponent}</span>
         </div>
         <div className="game-header-actions">
+          <span className="point-label">{formatElapsed(elapsed)}</span>
           <span className="point-label">Pt {currentPoint}</span>
           <button className="btn btn-ghost btn-sm" onClick={undoLast}>Undo</button>
           <button className="btn btn-danger btn-sm" onClick={() => onEnd(session)}>End Game</button>
@@ -124,7 +141,7 @@ export default function GamePage({ team, session, onUpdate, onEnd }: Props) {
           const player = team.players.find(p => p.id === event.playerId)
           return (
             <span key={event.id} className="event-chip">
-              {player?.name} · {EVENT_LABELS[event.type]}
+              {player?.name} · {EVENT_LABELS[event.type]} · {eventTime(event.timestamp)}
             </span>
           )
         })}
