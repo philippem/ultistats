@@ -93,8 +93,8 @@ export default function GamePage({ team, session, onUpdate, onEnd, onStats }: Pr
     if (type === 'catch') setDiscHolder(selectedId)
     else if (NEEDS_DISC.has(type)) setDiscHolder(null)
 
-    if (FLIPS_TO_D.has(type)) { setPossession('D'); setDiscHolder(null) }
-    if (FLIPS_TO_O.has(type)) { setPossession('O'); setDiscHolder(null) }
+    if (FLIPS_TO_D.has(type)) { setPossession('D'); setDiscHolder(null); setSelectedId(null) }
+    if (FLIPS_TO_O.has(type)) { setPossession('O'); setDiscHolder(null); setSelectedId(null) }
   }
 
   function scorePoint(us: boolean) {
