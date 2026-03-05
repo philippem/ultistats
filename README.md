@@ -1,73 +1,52 @@
-# React + TypeScript + Vite
+# UltiStats
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+A progressive web app for tracking ultimate frisbee stats on the sideline, built for iPad.
 
-Currently, two official plugins are available:
+## Features
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+- **Roster management** — create your team once, players persist across games
+- **Live game tracking** — tap a player, tap an action; designed for speed on a touchscreen
+- **O/D mode** — set the starting side each point; possession flips automatically on turnovers with a visual background tint (blue = offense, orange = defense)
+- **Lineup tracking** — select who's on the field each point to track O/D points per player
+- **Implicit catches** — selecting a new player on offense auto-logs a catch before a pass, goal, or throwaway
+- **Stats page** — per-player aggregate stats across all games, plus a game-by-game breakdown per player
+- **In-game stats** — view current game stats mid-game without losing your place
+- **Offline capable** — installable as a PWA; works without internet once loaded
 
-## React Compiler
+## Tracked stats
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+| Stat | Description |
+|------|-------------|
+| GP | Games played |
+| O Pts | Points started on offense |
+| D Pts | Points started on defense |
+| Pass | Completions thrown |
+| Catch | Completions received |
+| Drop% | Drops / (catches + drops) |
+| Blk | Hand blocks + interceptions + layout Ds |
+| Goal | Goals scored |
+| Ast | Assists |
+| Away | Throwaways |
+| UT | Unforced turnovers |
 
-## Expanding the ESLint configuration
+## Install on iPad
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+Open `https://philippem.github.io/ultistats/` in Safari, then tap **Share → Add to Home Screen**.
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+## Development
 
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
-
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+```bash
+npm install
+npm run dev        # local dev server
+npm test           # unit tests (vitest)
+npm run test:e2e   # E2E tests (playwright)
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+Deploys automatically to GitHub Pages on push to `main`.
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+## Stack
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
+- React + TypeScript + Vite
+- PWA via vite-plugin-pwa
+- Data stored in localStorage (no backend yet)
+- Hosted on GitHub Pages
