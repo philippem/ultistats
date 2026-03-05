@@ -6,6 +6,7 @@ import { execSync } from 'child_process'
 const gitHash = execSync('git rev-parse --short HEAD').toString().trim()
 
 export default defineConfig({
+  base: '/ultistats/',
   define: {
     __GIT_HASH__: JSON.stringify(gitHash),
   },
